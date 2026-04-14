@@ -24,6 +24,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: package-lock.json
 
       # 安装依赖
       - name: Install dependencies
@@ -37,35 +38,35 @@ jobs:
       - name: Install pkg
         run: npm install -g pkg
 
+      # 打包为Linux ARM二进制文件
+      - name: Package for Linux ARM
+        run: |
+          pkg . --targets node18-linux-armv7 --output danmu-api-linux-arm
+
       # 打包为Linux ARM64二进制文件
       - name: Package for Linux ARM64
         run: |
           pkg . --targets node18-linux-arm64 --output danmu-api-linux-arm64
 
-      # 打包为Linux AMD64二进制文件
-      - name: Package for Linux AMD64
-        run: |
-          pkg . --targets node18-linux-x64 --output danmu-api-linux-amd64
-
       # 修复文件权限
       - name: Fix file permissions
         run: |
+          chmod +x danmu-api-linux-arm
           chmod +x danmu-api-linux-arm64
-          chmod +x danmu-api-linux-amd64
 
       # 查看构建结果
       - name: Check build results
         run: ls -la
 
       # 上传构建产物
+      - name: Upload Linux ARM binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: danmu-api-linux-arm
+          path: danmu-api-linux-arm
+
       - name: Upload Linux ARM64 binary
         uses: actions/upload-artifact@v4
         with:
           name: danmu-api-linux-arm64
           path: danmu-api-linux-arm64
-
-      - name: Upload Linux AMD64 binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: danmu-api-linux-amd64
-          path: danmu-api-linux-amd64

@@ -58,8 +58,8 @@ jobs:
           chmod +x /tmp/app-armv7/start.sh
           
           # 复制到工作目录
-          cp /tmp/app-armv7/start.sh /github/workspace/danmu-api-linux-arm
-          chmod +x /github/workspace/danmu-api-linux-arm
+          cp /tmp/app-armv7/start.sh ./danmu-api-linux-arm
+          chmod +x ./danmu-api-linux-arm
 
       # 构建Linux ARM64二进制文件
       - name: Build Linux ARM64 binary
@@ -93,8 +93,8 @@ jobs:
           chmod +x /tmp/app-arm64/start.sh
           
           # 复制到工作目录
-          cp /tmp/app-arm64/start.sh /github/workspace/danmu-api-linux-arm64
-          chmod +x /github/workspace/danmu-api-linux-arm64
+          cp /tmp/app-arm64/start.sh ./danmu-api-linux-arm64
+          chmod +x ./danmu-api-linux-arm64
 
       # 查看构建结果
       - name: Check build results

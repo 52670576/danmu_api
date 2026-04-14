@@ -46,10 +46,6 @@ jobs:
           docker cp temp-armv7:/app /tmp/app-armv7
           docker rm temp-armv7
           
-          # 创建包含Node.js和项目的自包含包
-          cd /tmp/app-armv7
-          tar -czf /tmp/danmu-api-linux-arm.tar.gz .
-          
           # 创建启动脚本
           echo '#!/bin/sh
           cd "$(dirname "$0")"
@@ -60,9 +56,9 @@ jobs:
           fi' > /tmp/app-armv7/start.sh
           chmod +x /tmp/app-armv7/start.sh
           
-          # 复制到工作目录
-          cp /tmp/app-armv7/start.sh "${GITHUB_WORKSPACE}/danmu-api-linux-arm"
-          chmod +x "${GITHUB_WORKSPACE}/danmu-api-linux-arm"
+          # 压缩完整应用
+          cd /tmp
+          tar -czf "${GITHUB_WORKSPACE}/danmu-api-linux-arm.tar.gz" app-armv7
           
           # 检查文件是否存在
           ls -la "${GITHUB_WORKSPACE}"
@@ -87,10 +83,6 @@ jobs:
           docker cp temp-arm64:/app /tmp/app-arm64
           docker rm temp-arm64
           
-          # 创建包含Node.js和项目的自包含包
-          cd /tmp/app-arm64
-          tar -czf /tmp/danmu-api-linux-arm64.tar.gz .
-          
           # 创建启动脚本
           echo '#!/bin/sh
           cd "$(dirname "$0")"
@@ -101,9 +93,9 @@ jobs:
           fi' > /tmp/app-arm64/start.sh
           chmod +x /tmp/app-arm64/start.sh
           
-          # 复制到工作目录
-          cp /tmp/app-arm64/start.sh "${GITHUB_WORKSPACE}/danmu-api-linux-arm64"
-          chmod +x "${GITHUB_WORKSPACE}/danmu-api-linux-arm64"
+          # 压缩完整应用
+          cd /tmp
+          tar -czf "${GITHUB_WORKSPACE}/danmu-api-linux-arm64.tar.gz" app-arm64
           
           # 检查文件是否存在
           ls -la "${GITHUB_WORKSPACE}"
@@ -117,10 +109,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: danmu-api-linux-arm
-          path: danmu-api-linux-arm
+          path: danmu-api-linux-arm.tar.gz
 
       - name: Upload Linux ARM64 binary
         uses: actions/upload-artifact@v4
         with:
           name: danmu-api-linux-arm64
-          path: danmu-api-linux-arm64
+          path: danmu-api-linux-arm64.tar.gz

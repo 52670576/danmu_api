@@ -1,0 +1,71 @@
+name: Build Linux Binary
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 设置Node.js环境
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 安装依赖
+      - name: Install dependencies
+        run: npm install
+
+      # 构建项目
+      - name: Build project
+        run: npm run build-forward-widget
+
+      # 安装pkg工具
+      - name: Install pkg
+        run: npm install -g pkg
+
+      # 打包为Linux ARM64二进制文件
+      - name: Package for Linux ARM64
+        run: |
+          pkg . --targets node18-linux-arm64 --output danmu-api-linux-arm64
+
+      # 打包为Linux AMD64二进制文件
+      - name: Package for Linux AMD64
+        run: |
+          pkg . --targets node18-linux-x64 --output danmu-api-linux-amd64
+
+      # 修复文件权限
+      - name: Fix file permissions
+        run: |
+          chmod +x danmu-api-linux-arm64
+          chmod +x danmu-api-linux-amd64
+
+      # 查看构建结果
+      - name: Check build results
+        run: ls -la
+
+      # 上传构建产物
+      - name: Upload Linux ARM64 binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: danmu-api-linux-arm64
+          path: danmu-api-linux-arm64
+
+      - name: Upload Linux AMD64 binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: danmu-api-linux-amd64
+          path: danmu-api-linux-amd64

@@ -1,4 +1,4 @@
-name: Build Linux Binary
+name: Build Linux ARM Binary
 
 on:
   push:
@@ -18,41 +18,83 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 设置Node.js环境
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
+      # 设置QEMU以支持多平台构建
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      # 安装依赖
-      - name: Install dependencies
-        run: npm install
+      # 设置Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      # 构建项目
-      - name: Build project
-        run: npm run build-forward-widget
-
-      # 安装pkg工具
-      - name: Install pkg
-        run: npm install -g pkg
-
-      # 打包为Linux ARM二进制文件
-      - name: Package for Linux ARM
+      # 构建Linux ARMv7二进制文件
+      - name: Build Linux ARMv7 binary
         run: |
-          pkg . --targets node18-linux-armv7 --output danmu-api-linux-arm
+          # 创建一个包含Node.js和项目的Docker镜像
+          docker build --platform linux/arm/v7 -t danmu-api-armv7 -f - . << 'EOF'
+          FROM node:20-alpine
+          WORKDIR /app
+          COPY . .
+          RUN npm install
+          RUN npm run build-forward-widget
+          EOF
+          
+          # 从镜像中提取必要的文件
+          docker create --name temp-armv7 danmu-api-armv7
+          docker cp temp-armv7:/app /tmp/app-armv7
+          docker rm temp-armv7
+          
+          # 创建包含Node.js和项目的自包含包
+          cd /tmp/app-armv7
+          tar -czf /tmp/danmu-api-linux-arm.tar.gz .
+          
+          # 创建启动脚本
+          echo '#!/bin/sh
+          cd "$(dirname "$0")"
+          if [ -f node ]; then
+            ./node danmu_api/server.js
+          else
+            node danmu_api/server.js
+          fi' > /tmp/app-armv7/start.sh
+          chmod +x /tmp/app-armv7/start.sh
+          
+          # 复制到工作目录
+          cp /tmp/app-armv7/start.sh /github/workspace/danmu-api-linux-arm
+          chmod +x /github/workspace/danmu-api-linux-arm
 
-      # 打包为Linux ARM64二进制文件
-      - name: Package for Linux ARM64
+      # 构建Linux ARM64二进制文件
+      - name: Build Linux ARM64 binary
         run: |
-          pkg . --targets node18-linux-arm64 --output danmu-api-linux-arm64
-
-      # 修复文件权限
-      - name: Fix file permissions
-        run: |
-          chmod +x danmu-api-linux-arm
-          chmod +x danmu-api-linux-arm64
+          # 创建一个包含Node.js和项目的Docker镜像
+          docker build --platform linux/arm64 -t danmu-api-arm64 -f - . << 'EOF'
+          FROM node:20-alpine
+          WORKDIR /app
+          COPY . .
+          RUN npm install
+          RUN npm run build-forward-widget
+          EOF
+          
+          # 从镜像中提取必要的文件
+          docker create --name temp-arm64 danmu-api-arm64
+          docker cp temp-arm64:/app /tmp/app-arm64
+          docker rm temp-arm64
+          
+          # 创建包含Node.js和项目的自包含包
+          cd /tmp/app-arm64
+          tar -czf /tmp/danmu-api-linux-arm64.tar.gz .
+          
+          # 创建启动脚本
+          echo '#!/bin/sh
+          cd "$(dirname "$0")"
+          if [ -f node ]; then
+            ./node danmu_api/server.js
+          else
+            node danmu_api/server.js
+          fi' > /tmp/app-arm64/start.sh
+          chmod +x /tmp/app-arm64/start.sh
+          
+          # 复制到工作目录
+          cp /tmp/app-arm64/start.sh /github/workspace/danmu-api-linux-arm64
+          chmod +x /github/workspace/danmu-api-linux-arm64
 
       # 查看构建结果
       - name: Check build results

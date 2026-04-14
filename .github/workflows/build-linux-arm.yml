@@ -29,6 +29,9 @@ jobs:
       # 构建Linux ARMv7二进制文件
       - name: Build Linux ARMv7 binary
         run: |
+          # 显示当前工作目录
+          pwd
+          
           # 创建一个包含Node.js和项目的Docker镜像
           docker build --platform linux/arm/v7 -t danmu-api-armv7 -f - . << 'EOF'
           FROM node:20-alpine
@@ -58,12 +61,18 @@ jobs:
           chmod +x /tmp/app-armv7/start.sh
           
           # 复制到工作目录
-          cp /tmp/app-armv7/start.sh ./danmu-api-linux-arm
-          chmod +x ./danmu-api-linux-arm
+          cp /tmp/app-armv7/start.sh "${GITHUB_WORKSPACE}/danmu-api-linux-arm"
+          chmod +x "${GITHUB_WORKSPACE}/danmu-api-linux-arm"
+          
+          # 检查文件是否存在
+          ls -la "${GITHUB_WORKSPACE}"
 
       # 构建Linux ARM64二进制文件
       - name: Build Linux ARM64 binary
         run: |
+          # 显示当前工作目录
+          pwd
+          
           # 创建一个包含Node.js和项目的Docker镜像
           docker build --platform linux/arm64 -t danmu-api-arm64 -f - . << 'EOF'
           FROM node:20-alpine
@@ -93,8 +102,11 @@ jobs:
           chmod +x /tmp/app-arm64/start.sh
           
           # 复制到工作目录
-          cp /tmp/app-arm64/start.sh ./danmu-api-linux-arm64
-          chmod +x ./danmu-api-linux-arm64
+          cp /tmp/app-arm64/start.sh "${GITHUB_WORKSPACE}/danmu-api-linux-arm64"
+          chmod +x "${GITHUB_WORKSPACE}/danmu-api-linux-arm64"
+          
+          # 检查文件是否存在
+          ls -la "${GITHUB_WORKSPACE}"
 
       # 查看构建结果
       - name: Check build results

@@ -13,6 +13,7 @@ RUN npm install
 # 复制所有源代码
 COPY danmu_api/ ./danmu_api/
 COPY config/ ./config_example/
+COPY forward/ ./forward/
 
 # 暴露端口
 EXPOSE 9321

@@ -75,6 +75,9 @@ jobs:
           # 确保临时目录不存在
           rm -rf /tmp/app-arm64
           
+          # 清理之前的打包文件，避免被包含到新的打包中
+          rm -f "${GITHUB_WORKSPACE}/danmu-api-linux-arm.tar.gz"
+          
           # 创建一个包含Node.js和项目的Docker镜像
           docker build --platform linux/arm64 -t danmu-api-arm64 -f - . << 'EOF'
           FROM node:20-alpine

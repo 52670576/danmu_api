@@ -60,6 +60,9 @@ jobs:
           cd /tmp
           tar -czf "${GITHUB_WORKSPACE}/danmu-api-linux-arm.tar.gz" app-armv7
           
+          # 清理临时文件
+          rm -rf /tmp/app-armv7
+          
           # 检查文件是否存在
           ls -la "${GITHUB_WORKSPACE}"
 
@@ -68,6 +71,9 @@ jobs:
         run: |
           # 显示当前工作目录
           pwd
+          
+          # 确保临时目录不存在
+          rm -rf /tmp/app-arm64
           
           # 创建一个包含Node.js和项目的Docker镜像
           docker build --platform linux/arm64 -t danmu-api-arm64 -f - . << 'EOF'
@@ -96,6 +102,9 @@ jobs:
           # 压缩完整应用
           cd /tmp
           tar -czf "${GITHUB_WORKSPACE}/danmu-api-linux-arm64.tar.gz" app-arm64
+          
+          # 清理临时文件
+          rm -rf /tmp/app-arm64
           
           # 检查文件是否存在
           ls -la "${GITHUB_WORKSPACE}"
